@@ -25,7 +25,22 @@ import type {
   VerificationSession,
 } from "@/types"
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api/v1"
+function resolveApiBase(): string {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim()
+  if (configured) {
+    return configured.replace(/\/$/, "")
+  }
+
+  // Production on Vercel: use same-origin proxy defined in vercel.json.
+  if (import.meta.env.PROD) {
+    return "/api/v1"
+  }
+
+  // Local dev: Vite proxies /api to the backend (see vite.config.ts).
+  return "/api/v1"
+}
+
+const API_BASE = resolveApiBase()
 
 export class ApiError extends Error {
   status: number
@@ -70,6 +85,14 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
     if (response.status === 401) {
       handleUnauthorized()
       throw new ApiError("Unauthorized", 401)
+    }
+    if (response.status === 404) {
+      throw new ApiError(
+        API_BASE.startsWith("/")
+          ? "Admin API not found. Redeploy on Vercel after setting VITE_API_BASE_URL=/api/v1."
+          : `Admin API not found at ${API_BASE}. Check VITE_API_BASE_URL and redeploy.`,
+        404
+      )
     }
     throw new ApiError(`Request failed (${response.status})`, response.status)
   }
