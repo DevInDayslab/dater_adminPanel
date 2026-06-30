@@ -20,6 +20,7 @@ const pageTitles: Record<string, string> = {
   "/revenue": "Revenue",
   "/notifications": "Broadcast",
   "/products": "Products",
+  "/app-config": "App config",
 }
 
 export function AdminLayout() {

@@ -8,6 +8,7 @@ import { ReportsPage } from "@/pages/ReportsPage"
 import { RevenuePage } from "@/pages/RevenuePage"
 import { NotificationsPage } from "@/pages/NotificationsPage"
 import { ProductsPage } from "@/pages/ProductsPage"
+import { AppConfigPage } from "@/pages/AppConfigPage"
 
 function LegacyUserDetailRedirect() {
   const { userId } = useParams()
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="revenue" element={<RevenuePage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="app-config" element={<AppConfigPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Route>

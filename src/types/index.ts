@@ -424,6 +424,19 @@ export type ProductConfiguration = {
   updatedAt?: string | null
 }
 
+export type AppConfig = {
+  splashBackgroundS3Key: string | null
+  splashImageUrl: string | null
+  updatedAt: string | null
+}
+
+export type SplashPresignResponse = {
+  uploadUrl: string
+  s3Key: string
+  publicUrl: string
+  contentType: string
+}
+
 export type DashboardStats = {
   totalUsers: number
   dau: number

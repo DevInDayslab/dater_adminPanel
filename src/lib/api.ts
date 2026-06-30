@@ -601,6 +601,24 @@ export const adminApi = {
       body: JSON.stringify({ products }),
     })
   },
+
+  getAppConfig() {
+    return adminRequest<import("@/types").AppConfig>("/admin/app-config")
+  },
+
+  presignSplashUpload(contentType: string) {
+    return adminRequest<import("@/types").SplashPresignResponse>("/admin/app-config/splash/presign", {
+      method: "POST",
+      body: JSON.stringify({ contentType }),
+    })
+  },
+
+  updateAppConfig(body: { splashBackgroundS3Key: string | null }) {
+    return adminRequest<import("@/types").AppConfig>("/admin/app-config", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    })
+  },
 }
 
 export function persistLoginSession(session: AdminLoginResponse) {
