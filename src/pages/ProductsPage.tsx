@@ -24,6 +24,7 @@ type DraftRow = {
   displayLabel: string
   quantity: string
   priceRupees: string
+  compareAtPriceRupees: string
   badgeType: ProductConfiguration["badgeType"]
   badgeText: string
   isDefault: boolean
@@ -38,6 +39,8 @@ function toDraft(product: ProductConfiguration): DraftRow {
     displayLabel: product.displayLabel,
     quantity: String(product.quantity),
     priceRupees: String(product.pricePaise / 100),
+    compareAtPriceRupees:
+      product.compareAtPricePaise != null ? String(product.compareAtPricePaise / 100) : "",
     badgeType: product.badgeType,
     badgeText: product.badgeText ?? "",
     isDefault: product.isDefault,
@@ -221,6 +224,79 @@ function PackSection({
   )
 }
 
+function ChatUnlockSection({
+  rows,
+  onChange,
+}: {
+  rows: DraftRow[]
+  onChange: (packCode: string, patch: Partial<DraftRow>) => void
+}) {
+  return (
+    <SectionCard
+      title="Chat Unlock"
+      description="Per-chat unlock price shown on the chat paywall pill and overlay."
+    >
+      <div className="admin-table-scroll">
+        <table className="min-w-[760px] w-full border-collapse">
+          <thead>
+            <tr className="bg-surface-input">
+              {["Pack", "Label", "Price (₹)", "Compare-at (₹)", "Active"].map((col) => (
+                <th key={col} className="px-3 py-2 text-left text-xs text-text-muted">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.packCode} className="border-t border-border-subtle">
+                <td className="px-3 py-2 text-sm font-medium">{row.packCode}</td>
+                <td className="px-3 py-2">
+                  <Input
+                    value={row.displayLabel}
+                    onChange={(event) =>
+                      onChange(row.packCode, { displayLabel: event.target.value })
+                    }
+                    className="h-8 w-32"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <Input
+                    value={row.priceRupees}
+                    onChange={(event) => onChange(row.packCode, { priceRupees: event.target.value })}
+                    className="h-8 w-28"
+                    inputMode="numeric"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <Input
+                    value={row.compareAtPriceRupees}
+                    onChange={(event) =>
+                      onChange(row.packCode, { compareAtPriceRupees: event.target.value })
+                    }
+                    className="h-8 w-28"
+                    inputMode="numeric"
+                    placeholder="149"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={row.isActive}
+                    onChange={(event) =>
+                      onChange(row.packCode, { isActive: event.target.checked })
+                    }
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </SectionCard>
+  )
+}
+
 export function ProductsPage() {
   const pushToast = useAdminStore((s) => s.pushToast)
   const productsQuery = useAdminProducts()
@@ -238,6 +314,7 @@ export function ProductsPage() {
       premium: drafts.filter((row) => row.category === "PREMIUM"),
       boost: drafts.filter((row) => row.category === "BOOST"),
       comments: drafts.filter((row) => row.category === "COMMENTS"),
+      chat: drafts.filter((row) => row.category === "CHAT"),
     }),
     [drafts]
   )
@@ -272,6 +349,17 @@ export function ProductsPage() {
             isActive: row.isActive,
           }
         }
+        if (row.category === "CHAT") {
+          return {
+            packCode: row.packCode,
+            priceRupees: Number(row.priceRupees),
+            compareAtPriceRupees: row.compareAtPriceRupees.trim()
+              ? Number(row.compareAtPriceRupees)
+              : null,
+            displayLabel: row.displayLabel.trim(),
+            isActive: row.isActive,
+          }
+        }
         return {
           packCode: row.packCode,
           priceRupees: Number(row.priceRupees),
@@ -302,7 +390,7 @@ export function ProductsPage() {
   if (productsQuery.isError) {
     return (
       <div className="admin-card p-8 text-center text-sm text-rose-600">
-        Failed to load product catalog. Run migration 035 on the backend database.
+        Failed to load product catalog. Run migrations 035 and 036 on the backend database.
       </div>
     )
   }
@@ -327,6 +415,7 @@ export function ProductsPage() {
         rows={grouped.comments}
         onChange={handleChange}
       />
+      <ChatUnlockSection rows={grouped.chat} onChange={handleChange} />
 
       <div className="fixed bottom-6 right-6 z-40">
         <div className="rounded-full border border-border-subtle bg-white/95 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-sm">

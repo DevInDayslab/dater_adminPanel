@@ -404,15 +404,17 @@ export type BroadcastRecord = {
 
 export type ProductConfiguration = {
   packCode: string
-  category: "PREMIUM" | "BOOST" | "COMMENTS"
+  category: "PREMIUM" | "BOOST" | "COMMENTS" | "CHAT"
   quantity: number
   durationDays: number | null
   planCode: string | null
   displayTitle: string
   displayLabel: string
   pricePaise: number
+  compareAtPricePaise: number | null
   currency: string
   priceLabel: string
+  compareAtPriceLabel?: string | null
   buttonLabel: string
   badgeType: "MOST_POPULAR" | "SAVE" | null
   badgeText: string | null
