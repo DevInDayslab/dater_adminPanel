@@ -250,6 +250,12 @@ export type UsersListResponse = {
   }
 }
 
+export type UsersCsvExportResult = {
+  blob: Blob
+  rowCount: number
+  truncated: boolean
+}
+
 export type UserTrustResponse = {
   accountState: UserProfileDetail["accountState"]
   moderationWarningCount: number
@@ -290,6 +296,43 @@ function buildQuery(params: Record<string, string | number | undefined | null>) 
   }
   const qs = search.toString()
   return qs ? `?${qs}` : ""
+}
+
+async function downloadCsvRequest(path: string): Promise<UsersCsvExportResult> {
+  const headers = new Headers()
+  const token = getAccessToken()
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`)
+  }
+
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE}${path}`, { headers })
+  } catch {
+    throw new ApiError("Network error — could not reach the admin API.", 0)
+  }
+
+  if (response.status === 401) {
+    handleUnauthorized()
+    throw new ApiError("Unauthorized", 401)
+  }
+
+  if (!response.ok) {
+    let message = `Request failed (${response.status})`
+    try {
+      const payload = (await response.json()) as ApiEnvelope<unknown>
+      message = payload?.message || payload?.error || message
+    } catch {
+      // CSV error responses may not be JSON.
+    }
+    throw new ApiError(message, response.status)
+  }
+
+  const rowCount = Number(response.headers.get("X-Export-Row-Count") || "0")
+  const truncated = response.headers.get("X-Export-Truncated") === "true"
+  const blob = await response.blob()
+
+  return { blob, rowCount, truncated }
 }
 
 export const adminApi = {
@@ -353,6 +396,18 @@ export const adminApi = {
         page: query.page,
         limit: query.limit,
         sort: query.sort,
+      })}`
+    )
+  },
+
+  downloadUsersCsv(query: UsersListQuery = {}) {
+    return downloadCsvRequest(
+      `/admin/users/export${buildQuery({
+        search: query.search,
+        state: query.state,
+        premium: query.premium,
+        verified: query.verified,
+        gender: query.gender,
       })}`
     )
   },

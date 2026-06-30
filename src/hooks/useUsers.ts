@@ -3,6 +3,8 @@ import { adminApi } from "@/lib/api"
 import type { UsersListQuery } from "@/lib/api"
 import type { UsersListFilters } from "@/hooks/useUsersListParams"
 import { USERS_PAGE_SIZE } from "@/lib/constants"
+import { downloadBlob } from "@/lib/csvDownload"
+import { useAdminStore } from "@/stores/adminStore"
 
 export function usersListQueryFromFilters(filters: UsersListFilters): UsersListQuery {
   return {
@@ -24,6 +26,36 @@ export function usersListQueryFromFilters(filters: UsersListFilters): UsersListQ
     page: filters.page,
     limit: USERS_PAGE_SIZE,
   }
+}
+
+export function usersExportQueryFromFilters(
+  filters: UsersListFilters
+): Omit<UsersListQuery, "page" | "limit" | "sort"> {
+  const { page, limit, sort, ...exportQuery } = usersListQueryFromFilters(filters)
+  return exportQuery
+}
+
+export function useDownloadUsersCsv() {
+  const pushToast = useAdminStore((s) => s.pushToast)
+
+  return useMutation({
+    mutationFn: async (filters: UsersListFilters) => {
+      const query = usersExportQueryFromFilters(filters)
+      const result = await adminApi.downloadUsersCsv(query)
+      const date = new Date().toISOString().slice(0, 10)
+      downloadBlob(`dater-users-${date}.csv`, result.blob)
+      return result
+    },
+    onSuccess: (result) => {
+      pushToast(`Exported ${result.rowCount} users`)
+      if (result.truncated) {
+        pushToast("Export limited to 10,000 rows — narrow filters for full export")
+      }
+    },
+    onError: (error) => {
+      pushToast(error instanceof Error ? error.message : "Failed to export users", "error")
+    },
+  })
 }
 
 export function useUsersList(filters: UsersListFilters) {

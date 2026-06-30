@@ -31,12 +31,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
-import { useUsersList } from "@/hooks/useUsers"
+import { useDownloadUsersCsv, useUsersList } from "@/hooks/useUsers"
 import { useUsersListParams } from "@/hooks/useUsersListParams"
 import { ACCOUNT_STATE_OPTIONS, GENDER_OPTIONS } from "@/lib/constants"
 import { formatRelativeTime } from "@/lib/formatters"
 import type { UserListItem } from "@/types"
 import type { AccountState } from "@/types/enums"
+import { Download } from "lucide-react"
 
 const SKELETON_ROWS = 8
 
@@ -124,6 +125,7 @@ export function UsersPage() {
   }, [debouncedSearch, filters.search, patchParams])
 
   const usersQuery = useUsersList(filters)
+  const exportCsv = useDownloadUsersCsv()
   const users = usersQuery.data?.users ?? []
   const pagination = usersQuery.data?.pagination
 
@@ -306,6 +308,17 @@ export function UsersPage() {
               </SelectItem>
             ))}
           </FilterField>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Button
+            variant="outline"
+            className="h-10 rounded-[14px]"
+            disabled={exportCsv.isPending}
+            onClick={() => exportCsv.mutate(filters)}
+          >
+            <Download className="size-4" />
+            {exportCsv.isPending ? "Exporting…" : "Download CSV"}
+          </Button>
         </div>
       </div>
 
