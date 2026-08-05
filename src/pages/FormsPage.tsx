@@ -95,26 +95,46 @@ function FormDetailView({
             </div>
 
             {contact.attachmentUrl ? (
-              <div className="space-y-2 border-t border-border-subtle pt-4">
-                <p className="text-xs font-medium tracking-[0.12px] text-text-muted uppercase">
-                  Attachment
-                </p>
+              <div className="space-y-3 border-t border-border-subtle pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-medium tracking-[0.12px] text-text-muted uppercase">
+                    Attachment
+                  </p>
+                  <a
+                    href={contact.attachmentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
+                  >
+                    Open full size
+                    <ExternalLink className="size-4" />
+                  </a>
+                </div>
                 {isPdfUrl(contact.attachmentUrl) ? (
                   <a
                     href={contact.attachmentUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+                    className="inline-flex h-12 items-center gap-2 rounded-[14px] border border-border-subtle bg-surface-input px-4 text-sm font-medium hover:bg-surface-hover"
                   >
-                    View PDF
+                    View PDF attachment
                     <ExternalLink className="size-4" />
                   </a>
                 ) : (
-                  <img
-                    src={contact.attachmentUrl}
-                    alt="Contact form attachment"
-                    className="max-h-[480px] w-full max-w-md rounded-[10px] border border-border-subtle object-contain"
-                  />
+                  <a
+                    href={contact.attachmentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full max-w-3xl"
+                  >
+                    <div className="flex min-h-[320px] items-center justify-center rounded-[10px] border border-border-subtle bg-surface-input p-4">
+                      <img
+                        src={contact.attachmentUrl}
+                        alt="Contact form attachment"
+                        className="max-h-[560px] w-auto max-w-full object-contain"
+                      />
+                    </div>
+                  </a>
                 )}
               </div>
             ) : null}
@@ -156,7 +176,7 @@ export function FormsPage() {
       />
 
       <div className="admin-card p-4 md:p-5">
-        <div className="w-full sm:max-w-md">
+        <div className="w-full">
           <div className="space-y-2">
             <Label
               htmlFor="forms-search"
@@ -172,7 +192,7 @@ export function FormsPage() {
                 setPage(1)
               }}
               placeholder="Name, email, or mobile"
-              className="h-10 rounded-[14px]"
+              className="h-10 w-full rounded-[14px] border-[0.8px] border-border-input"
             />
           </div>
         </div>
@@ -232,9 +252,9 @@ export function FormsPage() {
                         {form.hasAttachment ? (
                           <Badge
                             variant="outline"
-                            className="gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                            className="gap-1.5 rounded-full px-3 py-1 text-sm font-medium"
                           >
-                            <Paperclip className="size-3" />
+                            <Paperclip className="size-3.5" />
                             Yes
                           </Badge>
                         ) : (
