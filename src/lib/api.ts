@@ -31,9 +31,9 @@ function resolveApiBase(): string {
     return configured.replace(/\/$/, "")
   }
 
-  // Production on Vercel: use same-origin proxy defined in vercel.json.
+  // Production: call API directly over HTTPS (backend has CORS enabled).
   if (import.meta.env.PROD) {
-    return "/api/v1"
+    return "https://api.dater.social/api/v1"
   }
 
   // Local dev: Vite proxies /api to the backend (see vite.config.ts).
