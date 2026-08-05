@@ -180,8 +180,11 @@ export function FormsPage() {
 
       <div className="admin-card overflow-hidden">
         {formsQuery.isError ? (
-          <div className="p-8 text-center text-sm text-[#FD1C1C]">
-            Unable to load form submissions.
+          <div className="space-y-2 p-8 text-center text-sm text-[#FD1C1C]">
+            <p>Unable to load form submissions.</p>
+            {formsQuery.error instanceof Error ? (
+              <p className="text-text-secondary">{formsQuery.error.message}</p>
+            ) : null}
           </div>
         ) : (
           <div className="admin-table-scroll">
