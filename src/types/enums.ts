@@ -10,7 +10,14 @@ export type AccountState =
   | "UNDERAGE_BLOCKED"
   | "PENDING_CAPTCHA"
 
-export type PremiumStatus = "INACTIVE" | "ACTIVE" | "EXPIRED"
+export type PremiumStatus =
+  | "INACTIVE"
+  | "ACTIVE"
+  | "EXPIRED"
+  | "GRACE_PERIOD"
+  | "ON_HOLD"
+  | "PAUSED"
+  | "CANCELLED"
 
 export type PremiumPlanCode =
   | "PREMIUM_DAY"

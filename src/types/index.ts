@@ -391,6 +391,38 @@ export type ReportDetailResponse = {
   context: ReportDetailContext
 }
 
+export type LandingContactFormListItem = {
+  id: string
+  name: string
+  email: string
+  mobile: string
+  description: string
+  hasAttachment: boolean
+  ipAddress: string | null
+  createdAt: string
+}
+
+export type LandingContactFormDetail = {
+  id: string
+  name: string
+  email: string
+  mobile: string
+  description: string
+  attachmentUrl: string | null
+  attachmentS3Key: string | null
+  ipAddress: string | null
+  createdAt: string
+}
+
+export type LandingContactFormsListResponse = {
+  items: LandingContactFormListItem[]
+  pagination: { page: number; limit: number; total: number; totalPages: number }
+}
+
+export type LandingContactFormDetailResponse = {
+  contact: LandingContactFormDetail
+}
+
 export type BroadcastRecord = {
   id: string
   title: string
@@ -422,6 +454,7 @@ export type ProductConfiguration = {
   isActive: boolean
   sortOrder: number
   googlePlayProductId: string | null
+  googlePlayBasePlanId: string | null
   appleProductId: string | null
   updatedAt?: string | null
 }

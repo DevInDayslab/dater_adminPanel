@@ -29,6 +29,8 @@ type DraftRow = {
   badgeText: string
   isDefault: boolean
   isActive: boolean
+  googlePlayProductId: string
+  googlePlayBasePlanId: string
 }
 
 function toDraft(product: ProductConfiguration): DraftRow {
@@ -45,6 +47,8 @@ function toDraft(product: ProductConfiguration): DraftRow {
     badgeText: product.badgeText ?? "",
     isDefault: product.isDefault,
     isActive: product.isActive,
+    googlePlayProductId: product.googlePlayProductId ?? "",
+    googlePlayBasePlanId: product.googlePlayBasePlanId ?? "",
   }
 }
 
@@ -58,13 +62,13 @@ function PremiumSection({
   return (
     <SectionCard
       title="Premium"
-      description="Set the number and unit shown on paywalls (e.g. 10 + Days). Access length is derived automatically."
+      description="Set paywall copy and teaser prices. Google Play Console controls the actual checkout price. Map each plan to a Play subscription product and base plan ID."
     >
       <div className="admin-table-scroll">
-        <table className="min-w-[980px] w-full border-collapse">
+        <table className="min-w-[1180px] w-full border-collapse">
           <thead>
             <tr className="bg-surface-input">
-              {["Pack", "Amount", "Unit", "Price (₹)", "Badge", "Default", "Active"].map((col) => (
+              {["Pack", "Amount", "Unit", "Teaser price (₹)", "Play product ID", "Play base plan", "Badge", "Default", "Active"].map((col) => (
                 <th key={col} className="px-3 py-2 text-left text-xs text-text-muted">
                   {col}
                 </th>
@@ -114,6 +118,26 @@ function PremiumSection({
                 </td>
                 <td className="px-3 py-2">
                   <Input
+                    value={row.googlePlayProductId}
+                    onChange={(event) =>
+                      onChange(row.packCode, { googlePlayProductId: event.target.value })
+                    }
+                    placeholder="dater_premium"
+                    className="h-8 w-40"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <Input
+                    value={row.googlePlayBasePlanId}
+                    onChange={(event) =>
+                      onChange(row.packCode, { googlePlayBasePlanId: event.target.value })
+                    }
+                    placeholder="month"
+                    className="h-8 w-32"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <Input
                     value={row.badgeText}
                     onChange={(event) => onChange(row.packCode, { badgeText: event.target.value })}
                     placeholder="Save 25%"
@@ -158,12 +182,15 @@ function PackSection({
   onChange: (packCode: string, patch: Partial<DraftRow>) => void
 }) {
   return (
-    <SectionCard title={title} description={description}>
+    <SectionCard
+      title={title}
+      description={`${description} Teaser prices are for in-app display; Google Play controls checkout price.`}
+    >
       <div className="admin-table-scroll">
-        <table className="min-w-[920px] w-full border-collapse">
+        <table className="min-w-[1040px] w-full border-collapse">
           <thead>
             <tr className="bg-surface-input">
-              {["Pack", "Quantity", "Price (₹)", "Badge", "Default", "Active"].map((col) => (
+              {["Pack", "Quantity", "Teaser price (₹)", "Play product ID", "Badge", "Default", "Active"].map((col) => (
                 <th key={col} className="px-3 py-2 text-left text-xs text-text-muted">
                   {col}
                 </th>
@@ -188,6 +215,16 @@ function PackSection({
                     onChange={(event) => onChange(row.packCode, { priceRupees: event.target.value })}
                     className="h-8 w-28"
                     inputMode="numeric"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <Input
+                    value={row.googlePlayProductId}
+                    onChange={(event) =>
+                      onChange(row.packCode, { googlePlayProductId: event.target.value })
+                    }
+                    placeholder="boost_6"
+                    className="h-8 w-40"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -234,13 +271,13 @@ function ChatUnlockSection({
   return (
     <SectionCard
       title="Chat Unlock"
-      description="Per-chat unlock price shown on the chat paywall pill and overlay."
+      description="Per-chat unlock teaser price. Google Play controls checkout price."
     >
       <div className="admin-table-scroll">
-        <table className="min-w-[760px] w-full border-collapse">
+        <table className="min-w-[920px] w-full border-collapse">
           <thead>
             <tr className="bg-surface-input">
-              {["Pack", "Label", "Price (₹)", "Compare-at (₹)", "Active"].map((col) => (
+              {["Pack", "Label", "Teaser price (₹)", "Compare-at (₹)", "Play product ID", "Active"].map((col) => (
                 <th key={col} className="px-3 py-2 text-left text-xs text-text-muted">
                   {col}
                 </th>
@@ -277,6 +314,16 @@ function ChatUnlockSection({
                     className="h-8 w-28"
                     inputMode="numeric"
                     placeholder="149"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <Input
+                    value={row.googlePlayProductId}
+                    onChange={(event) =>
+                      onChange(row.packCode, { googlePlayProductId: event.target.value })
+                    }
+                    placeholder="chat_unlock_single"
+                    className="h-8 w-44"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -336,6 +383,11 @@ export function ProductsPage() {
 
   const handleSave = async () => {
     try {
+      const playFields = (row: DraftRow) => ({
+        googlePlayProductId: row.googlePlayProductId.trim() || null,
+        googlePlayBasePlanId:
+          row.category === "PREMIUM" ? row.googlePlayBasePlanId.trim() || null : undefined,
+      })
       const payload = drafts.map((row) => {
         if (row.category === "PREMIUM") {
           return {
@@ -347,6 +399,7 @@ export function ProductsPage() {
             badgeType: row.badgeType,
             isDefault: row.isDefault,
             isActive: row.isActive,
+            ...playFields(row),
           }
         }
         if (row.category === "CHAT") {
@@ -358,6 +411,7 @@ export function ProductsPage() {
               : null,
             displayLabel: row.displayLabel.trim(),
             isActive: row.isActive,
+            googlePlayProductId: row.googlePlayProductId.trim() || null,
           }
         }
         return {
@@ -368,6 +422,7 @@ export function ProductsPage() {
           badgeType: row.badgeType,
           isDefault: row.isDefault,
           isActive: row.isActive,
+          googlePlayProductId: row.googlePlayProductId.trim() || null,
         }
       })
       await updateMutation.mutateAsync(payload)
@@ -399,7 +454,7 @@ export function ProductsPage() {
     <div className="relative space-y-8 pb-24">
       <PageHeader
         title="Products"
-        description="Edit paywall prices and pack sizes. Changes sync to the mobile app on next launch."
+        description="Edit paywall teaser prices, copy, and Google Play SKU mapping. Changes sync to the mobile app on next launch."
       />
 
       <PremiumSection rows={grouped.premium} onChange={handleChange} />

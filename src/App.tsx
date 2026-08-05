@@ -9,6 +9,7 @@ import { RevenuePage } from "@/pages/RevenuePage"
 import { NotificationsPage } from "@/pages/NotificationsPage"
 import { ProductsPage } from "@/pages/ProductsPage"
 import { AppConfigPage } from "@/pages/AppConfigPage"
+import { FormsPage } from "@/pages/FormsPage"
 
 function LegacyUserDetailRedirect() {
   const { userId } = useParams()
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="users/:userId/*" element={<LegacyUserDetailRedirect />} />
           <Route path="moderation" element={<Navigate to="/reports" replace />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="forms" element={<FormsPage />} />
           <Route path="revenue" element={<RevenuePage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="products" element={<ProductsPage />} />

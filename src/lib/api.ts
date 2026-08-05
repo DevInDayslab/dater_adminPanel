@@ -674,6 +674,22 @@ export const adminApi = {
       body: JSON.stringify(body),
     })
   },
+
+  listForms(query: { search?: string; page?: number; limit?: number } = {}) {
+    return adminRequest<import("@/types").LandingContactFormsListResponse>(
+      `/admin/forms${buildQuery({
+        search: query.search?.trim() || undefined,
+        page: query.page,
+        limit: query.limit,
+      })}`
+    )
+  },
+
+  getFormDetail(formId: string) {
+    return adminRequest<import("@/types").LandingContactFormDetailResponse>(
+      `/admin/forms/${formId}`
+    )
+  },
 }
 
 export function persistLoginSession(session: AdminLoginResponse) {

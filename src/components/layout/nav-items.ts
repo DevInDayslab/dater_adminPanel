@@ -1,6 +1,7 @@
 import {
   Bell,
   DollarSign,
+  FileText,
   Image,
   LayoutDashboard,
   Flag,
@@ -18,6 +19,7 @@ export const primaryNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Users", href: "/users", icon: Users },
   { label: "Reports", href: "/reports", icon: Flag },
+  { label: "Forms", href: "/forms", icon: FileText },
   { label: "Revenue", href: "/revenue", icon: DollarSign },
   { label: "Broadcast", href: "/notifications", icon: Bell },
   { label: "Products", href: "/products", icon: Package },
