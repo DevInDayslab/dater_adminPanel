@@ -15,7 +15,29 @@ import {
   useSeoAdminSettings,
 } from "@/hooks/useSettings"
 import { formatDateTime } from "@/lib/formatters"
+import { cn } from "@/lib/utils"
 import { useAdminStore } from "@/stores/adminStore"
+
+function FormMessage({
+  message,
+  variant,
+}: {
+  message: string | null
+  variant: "error" | "success"
+}) {
+  if (!message) return null
+  return (
+    <p
+      role="alert"
+      className={cn(
+        "text-sm",
+        variant === "error" ? "text-[#FD1C1C]" : "text-emerald-700"
+      )}
+    >
+      {message}
+    </p>
+  )
+}
 
 export function SettingsPage() {
   const pushToast = useAdminStore((s) => s.pushToast)
@@ -30,8 +52,13 @@ export function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null)
+
   const [seoEmail, setSeoEmail] = useState("")
   const [seoPassword, setSeoPassword] = useState("")
+  const [seoError, setSeoError] = useState<string | null>(null)
+  const [seoSuccess, setSeoSuccess] = useState<string | null>(null)
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false)
 
   const seoAdmin = seoAdminQuery.data
@@ -45,12 +72,19 @@ export function SettingsPage() {
 
   async function handlePasswordSubmit(event: FormEvent) {
     event.preventDefault()
-    if (newPassword !== confirmPassword) {
-      pushToast("New passwords do not match", "error")
+    setPasswordError(null)
+    setPasswordSuccess(null)
+
+    if (!currentPassword) {
+      setPasswordError("Enter your current password.")
       return
     }
     if (newPassword.length < 8) {
-      pushToast("New password must be at least 8 characters", "error")
+      setPasswordError("New password must be at least 8 characters.")
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.")
       return
     }
 
@@ -59,24 +93,31 @@ export function SettingsPage() {
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
+      setPasswordSuccess("Password updated.")
       pushToast("Password updated")
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Failed to update password", "error")
+      const message =
+        error instanceof Error ? error.message : "Failed to update password"
+      setPasswordError(message)
+      pushToast(message, "error")
     }
   }
 
   async function handleSeoAdminSubmit(event: FormEvent) {
     event.preventDefault()
+    setSeoError(null)
+    setSeoSuccess(null)
+
     if (!seoEmail.trim()) {
-      pushToast("SEO admin email is required", "error")
+      setSeoError("SEO admin email is required.")
       return
     }
     if (!seoConfigured && seoPassword.length < 8) {
-      pushToast("Password is required and must be at least 8 characters", "error")
+      setSeoError("Password is required and must be at least 8 characters.")
       return
     }
     if (seoPassword && seoPassword.length < 8) {
-      pushToast("New password must be at least 8 characters", "error")
+      setSeoError("New password must be at least 8 characters.")
       return
     }
 
@@ -86,9 +127,14 @@ export function SettingsPage() {
         password: seoPassword || undefined,
       })
       setSeoPassword("")
-      pushToast(seoConfigured ? "SEO admin updated" : "SEO admin created")
+      const message = seoConfigured ? "SEO admin updated." : "SEO admin created."
+      setSeoSuccess(message)
+      pushToast(message)
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Failed to save SEO admin", "error")
+      const message =
+        error instanceof Error ? error.message : "Failed to save SEO admin"
+      setSeoError(message)
+      pushToast(message, "error")
     }
   }
 
@@ -96,9 +142,13 @@ export function SettingsPage() {
     try {
       await revokeSessionsMutation.mutateAsync()
       setRevokeDialogOpen(false)
+      setSeoSuccess("All SEO admin sessions revoked.")
       pushToast("All SEO admin sessions revoked")
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Failed to revoke sessions", "error")
+      const message =
+        error instanceof Error ? error.message : "Failed to revoke sessions"
+      setSeoError(message)
+      pushToast(message, "error")
     }
   }
 
@@ -108,6 +158,17 @@ export function SettingsPage() {
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-64 w-full" />
         <Skeleton className="h-80 w-full" />
+      </div>
+    )
+  }
+
+  if (accountQuery.isError) {
+    return (
+      <div className="admin-card p-8 text-center text-sm text-[#FD1C1C]">
+        Failed to load account settings.{" "}
+        {accountQuery.error instanceof Error
+          ? accountQuery.error.message
+          : "Try refreshing the page."}
       </div>
     )
   }
@@ -137,8 +198,13 @@ export function SettingsPage() {
               type="password"
               autoComplete="current-password"
               value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              onChange={(e) => {
+                setCurrentPassword(e.target.value)
+                setPasswordError(null)
+                setPasswordSuccess(null)
+              }}
               className="mt-1 h-10 w-full rounded-[14px]"
+              aria-invalid={Boolean(passwordError)}
               required
             />
           </div>
@@ -149,8 +215,13 @@ export function SettingsPage() {
               type="password"
               autoComplete="new-password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => {
+                setNewPassword(e.target.value)
+                setPasswordError(null)
+                setPasswordSuccess(null)
+              }}
               className="mt-1 h-10 w-full rounded-[14px]"
+              aria-invalid={Boolean(passwordError)}
               required
             />
           </div>
@@ -161,11 +232,18 @@ export function SettingsPage() {
               type="password"
               autoComplete="new-password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value)
+                setPasswordError(null)
+                setPasswordSuccess(null)
+              }}
               className="mt-1 h-10 w-full rounded-[14px]"
+              aria-invalid={Boolean(passwordError)}
               required
             />
           </div>
+          <FormMessage message={passwordError} variant="error" />
+          <FormMessage message={passwordSuccess} variant="success" />
           <Button type="submit" disabled={changePasswordMutation.isPending}>
             {changePasswordMutation.isPending ? "Updating…" : "Update password"}
           </Button>
@@ -176,7 +254,14 @@ export function SettingsPage() {
         title="SEO admin credentials"
         description="Configure the account used to sign in to Dater SEO Admin. Changing the email or password signs out all active SEO sessions."
       >
-        {seoConfigured ? (
+        {seoAdminQuery.isError ? (
+          <p className="mb-4 text-sm text-[#FD1C1C]">
+            Failed to load SEO admin.{" "}
+            {seoAdminQuery.error instanceof Error
+              ? seoAdminQuery.error.message
+              : "Try refreshing the page."}
+          </p>
+        ) : seoConfigured ? (
           <div className="mb-4 grid gap-2 text-sm text-text-secondary sm:grid-cols-2">
             <p>
               Last login:{" "}
@@ -203,9 +288,14 @@ export function SettingsPage() {
               type="email"
               autoComplete="username"
               value={seoEmail}
-              onChange={(e) => setSeoEmail(e.target.value)}
+              onChange={(e) => {
+                setSeoEmail(e.target.value)
+                setSeoError(null)
+                setSeoSuccess(null)
+              }}
               placeholder="seo@dater.app"
               className="mt-1 h-10 w-full rounded-[14px]"
+              aria-invalid={Boolean(seoError)}
               required
             />
           </div>
@@ -218,11 +308,18 @@ export function SettingsPage() {
               type="password"
               autoComplete="new-password"
               value={seoPassword}
-              onChange={(e) => setSeoPassword(e.target.value)}
+              onChange={(e) => {
+                setSeoPassword(e.target.value)
+                setSeoError(null)
+                setSeoSuccess(null)
+              }}
               className="mt-1 h-10 w-full rounded-[14px]"
+              aria-invalid={Boolean(seoError)}
               required={!seoConfigured}
             />
           </div>
+          <FormMessage message={seoError} variant="error" />
+          <FormMessage message={seoSuccess} variant="success" />
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={saveSeoAdminMutation.isPending}>
               {saveSeoAdminMutation.isPending

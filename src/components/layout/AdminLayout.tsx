@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 import { AdminSidebar } from "@/components/layout/AdminSidebar"
 import { AdminTopBar } from "@/components/layout/AdminTopBar"
+import { AdminToasts } from "@/components/shared/AdminToasts"
 import {
   Sheet,
   SheetContent,
@@ -22,6 +23,7 @@ const pageTitles: Record<string, string> = {
   "/notifications": "Broadcast",
   "/products": "Products",
   "/app-config": "App config",
+  "/settings": "Settings",
 }
 
 export function AdminLayout() {
@@ -75,6 +77,7 @@ export function AdminLayout() {
             </main>
           </div>
         </div>
+        <AdminToasts />
       </div>
     </TooltipProvider>
   )
