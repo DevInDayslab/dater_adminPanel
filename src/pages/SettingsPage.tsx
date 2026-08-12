@@ -129,8 +129,8 @@ export function SettingsPage() {
           </p>
         ) : null}
 
-        <form className="w-full max-w-lg space-y-4" onSubmit={handlePasswordSubmit}>
-          <div className="w-full space-y-2">
+        <form className="w-[30rem] max-w-full space-y-5" onSubmit={handlePasswordSubmit}>
+          <div className="w-full">
             <Label htmlFor="current-password">Current password</Label>
             <Input
               id="current-password"
@@ -138,11 +138,11 @@ export function SettingsPage() {
               autoComplete="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full"
+              className="mt-1 h-10 w-full rounded-[14px]"
               required
             />
           </div>
-          <div className="w-full space-y-2">
+          <div className="w-full">
             <Label htmlFor="new-password">New password</Label>
             <Input
               id="new-password"
@@ -150,11 +150,11 @@ export function SettingsPage() {
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full"
+              className="mt-1 h-10 w-full rounded-[14px]"
               required
             />
           </div>
-          <div className="w-full space-y-2">
+          <div className="w-full">
             <Label htmlFor="confirm-password">Confirm new password</Label>
             <Input
               id="confirm-password"
@@ -162,7 +162,7 @@ export function SettingsPage() {
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full"
+              className="mt-1 h-10 w-full rounded-[14px]"
               required
             />
           </div>
@@ -195,8 +195,8 @@ export function SettingsPage() {
           </p>
         )}
 
-        <form className="w-full max-w-lg space-y-4" onSubmit={handleSeoAdminSubmit}>
-          <div className="w-full space-y-2">
+        <form className="w-[30rem] max-w-full space-y-5" onSubmit={handleSeoAdminSubmit}>
+          <div className="w-full">
             <Label htmlFor="seo-email">Email</Label>
             <Input
               id="seo-email"
@@ -205,11 +205,11 @@ export function SettingsPage() {
               value={seoEmail}
               onChange={(e) => setSeoEmail(e.target.value)}
               placeholder="seo@dater.app"
-              className="w-full"
+              className="mt-1 h-10 w-full rounded-[14px]"
               required
             />
           </div>
-          <div className="w-full space-y-2">
+          <div className="w-full">
             <Label htmlFor="seo-password">
               {seoConfigured ? "New password (optional)" : "Password"}
             </Label>
@@ -219,7 +219,7 @@ export function SettingsPage() {
               autoComplete="new-password"
               value={seoPassword}
               onChange={(e) => setSeoPassword(e.target.value)}
-              className="w-full"
+              className="mt-1 h-10 w-full rounded-[14px]"
               required={!seoConfigured}
             />
           </div>
