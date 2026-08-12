@@ -129,8 +129,8 @@ export function SettingsPage() {
           </p>
         ) : null}
 
-        <form className="max-w-md space-y-4" onSubmit={handlePasswordSubmit}>
-          <div className="space-y-2">
+        <form className="w-full max-w-lg space-y-4" onSubmit={handlePasswordSubmit}>
+          <div className="w-full space-y-2">
             <Label htmlFor="current-password">Current password</Label>
             <Input
               id="current-password"
@@ -138,10 +138,11 @@ export function SettingsPage() {
               autoComplete="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full"
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="w-full space-y-2">
             <Label htmlFor="new-password">New password</Label>
             <Input
               id="new-password"
@@ -149,10 +150,11 @@ export function SettingsPage() {
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full"
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="w-full space-y-2">
             <Label htmlFor="confirm-password">Confirm new password</Label>
             <Input
               id="confirm-password"
@@ -160,6 +162,7 @@ export function SettingsPage() {
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full"
               required
             />
           </div>
@@ -192,8 +195,8 @@ export function SettingsPage() {
           </p>
         )}
 
-        <form className="max-w-md space-y-4" onSubmit={handleSeoAdminSubmit}>
-          <div className="space-y-2">
+        <form className="w-full max-w-lg space-y-4" onSubmit={handleSeoAdminSubmit}>
+          <div className="w-full space-y-2">
             <Label htmlFor="seo-email">Email</Label>
             <Input
               id="seo-email"
@@ -202,10 +205,11 @@ export function SettingsPage() {
               value={seoEmail}
               onChange={(e) => setSeoEmail(e.target.value)}
               placeholder="seo@dater.app"
+              className="w-full"
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="w-full space-y-2">
             <Label htmlFor="seo-password">
               {seoConfigured ? "New password (optional)" : "Password"}
             </Label>
@@ -215,6 +219,7 @@ export function SettingsPage() {
               autoComplete="new-password"
               value={seoPassword}
               onChange={(e) => setSeoPassword(e.target.value)}
+              className="w-full"
               required={!seoConfigured}
             />
           </div>

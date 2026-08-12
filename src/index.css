@@ -97,6 +97,15 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Keep text inputs usable even if field-sizing/content width collapses. */
+  input[data-slot="input"],
+  textarea[data-slot="textarea"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    field-sizing: fixed;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
