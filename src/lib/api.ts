@@ -143,6 +143,33 @@ export type AdminLoginResponse = {
   admin: StoredAdminSession["admin"]
 }
 
+export type AdminAccountResponse = {
+  id: string
+  email: string
+  name: string
+  role: "FULL" | "SEO"
+  lastLoginAt: string | null
+}
+
+export type SeoAdminSettingsResponse =
+  | { configured: false }
+  | {
+      configured: true
+      id: string
+      email: string
+      name: string
+      lastLoginAt: string | null
+      activeSessionCount: number
+    }
+
+export type SeoAdminSession = {
+  id: string
+  ipAddress: string | null
+  userAgent: string | null
+  createdAt: string
+  expiresAt: string
+}
+
 export type DashboardStatsResponse = {
   totalUsers: number
   dau: number
@@ -339,7 +366,7 @@ export const adminApi = {
   login(email: string, password: string) {
     return adminRequest<AdminLoginResponse>("/admin/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, portal: "full" }),
     })
   },
 
@@ -689,6 +716,38 @@ export const adminApi = {
     return adminRequest<import("@/types").LandingContactFormDetailResponse>(
       `/admin/forms/${formId}`
     )
+  },
+
+  getAccount() {
+    return adminRequest<AdminAccountResponse>("/admin/settings/account")
+  },
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return adminRequest<{ updated: boolean }>("/admin/settings/change-password", {
+      method: "POST",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    })
+  },
+
+  getSeoAdmin() {
+    return adminRequest<SeoAdminSettingsResponse>("/admin/settings/seo-admin")
+  },
+
+  saveSeoAdmin(body: { email: string; password?: string; name?: string }) {
+    return adminRequest<SeoAdminSettingsResponse>("/admin/settings/seo-admin", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    })
+  },
+
+  listSeoAdminSessions() {
+    return adminRequest<{ sessions: SeoAdminSession[] }>("/admin/settings/seo-admin/sessions")
+  },
+
+  revokeSeoAdminSessions() {
+    return adminRequest<{ revoked: boolean }>("/admin/settings/seo-admin/revoke-sessions", {
+      method: "POST",
+    })
   },
 }
 

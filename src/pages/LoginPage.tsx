@@ -41,7 +41,9 @@ export function LoginPage() {
     } catch (err) {
       const message =
         err instanceof ApiError
-          ? err.message
+          ? err.code === "WRONG_PORTAL"
+            ? "This account is for SEO Admin. Use the SEO admin panel to sign in."
+            : err.message
           : err instanceof Error
             ? err.message
             : "Login failed"

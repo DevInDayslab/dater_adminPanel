@@ -36,7 +36,7 @@ function toAdminIdentity(admin: StoredAdminSession["admin"]): AdminIdentity {
     id: admin.id,
     name: admin.name,
     email: admin.email,
-    role: "ADMIN",
+    role: admin.role || "FULL",
   }
 }
 
@@ -100,8 +100,9 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
 }))
 
 export function formatAdminRole(role: AdminRole): string {
-  if (role === "ADMIN") return "Admin"
-  return role.charAt(0) + role.slice(1).toLowerCase()
+  if (role === "FULL") return "Admin"
+  if (role === "SEO") return "SEO Admin"
+  return role
 }
 
 export function canAccessChat(_role: AdminRole): boolean {

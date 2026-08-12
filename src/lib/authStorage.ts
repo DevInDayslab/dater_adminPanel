@@ -5,6 +5,7 @@ export type StoredAdminSession = {
     id: string
     name: string
     email: string
+    role: "FULL" | "SEO"
   }
 }
 

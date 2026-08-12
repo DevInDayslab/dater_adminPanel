@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Flag,
   Package,
+  Settings,
   Users,
 } from "lucide-react"
 
@@ -24,6 +25,7 @@ export const primaryNavItems: NavItem[] = [
   { label: "Broadcast", href: "/notifications", icon: Bell },
   { label: "Products", href: "/products", icon: Package },
   { label: "App config", href: "/app-config", icon: Image },
+  { label: "Settings", href: "/settings", icon: Settings },
 ]
 
 export const userDetailTabs = [

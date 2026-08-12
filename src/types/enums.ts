@@ -77,7 +77,7 @@ export type InteractionType = "REQUEST" | "COMMENT_REQUEST" | "IGNORE" | "VIEWED
 
 export type RequestStatus = "PENDING" | "ACCEPTED" | "IGNORED"
 
-export type AdminRole = "ADMIN" | "MODERATOR" | "SUPPORT"
+export type AdminRole = "FULL" | "SEO"
 
 export type TimeWindow = "7d" | "30d" | "6m" | "1y" | "all"
 
