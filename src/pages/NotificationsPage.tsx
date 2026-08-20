@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { SectionCard } from "@/components/shared/FieldGrid"
 import { Button } from "@/components/ui/button"
@@ -33,6 +34,7 @@ import {
   type BroadcastAudienceValue,
 } from "@/lib/broadcastLabels"
 import { formatDateTime } from "@/lib/formatters"
+import { adminApi } from "@/lib/api"
 import { canAccessBroadcast, useAdminStore } from "@/stores/adminStore"
 
 function NotificationPreview({ title, body }: { title: string; body: string }) {
@@ -66,6 +68,10 @@ export function NotificationsPage() {
 
   const audienceQuery = useBroadcastAudienceSize(audience)
   const historyQuery = useBroadcastHistory(historyPage)
+  const pushHealthQuery = useQuery({
+    queryKey: ["admin", "push-health"],
+    queryFn: () => adminApi.getPushHealth(),
+  })
   const sendBroadcast = useSendBroadcast()
 
   const audienceSize = audienceQuery.data?.estimatedRecipients ?? 0
@@ -110,6 +116,33 @@ export function NotificationsPage() {
         title="Broadcast"
         description="Send push notifications to all users or a targeted audience."
       />
+
+      <SectionCard title="Push delivery health">
+        {pushHealthQuery.isLoading ? (
+          <Skeleton className="h-10 w-full max-w-xl" />
+        ) : pushHealthQuery.data ? (
+          <div className="space-y-2 text-sm text-text-secondary">
+            <p>
+              Firebase service account configured:{" "}
+              <span className="font-medium text-text-primary">
+                {pushHealthQuery.data.firebaseServiceAccountConfigured ? "Yes" : "No"}
+              </span>
+            </p>
+            <p>
+              Firebase Admin ready:{" "}
+              <span className="font-medium text-text-primary">
+                {pushHealthQuery.data.firebaseAdminReady ? "Yes" : "No"}
+              </span>
+            </p>
+            <p className="text-xs text-text-meta">
+              TestFlight requires a production APNs key in Firebase Console (datermain → Cloud
+              Messaging → Apple app). That cannot be verified from the server.
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-text-secondary">Unable to load push health.</p>
+        )}
+      </SectionCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <SectionCard title="Compose broadcast">

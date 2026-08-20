@@ -280,8 +280,27 @@ export type PushToken = {
   id: string
   platform: "ANDROID" | "IOS"
   deviceId: string | null
+  tokenPrefix: string
+  tokenLength: number
+  tokenKind: "fcm" | "apns_hex" | "uuid_like" | "short" | "empty"
   isActive: boolean
   lastSeenAt: string
+}
+
+export type PushDeliveryHealth = {
+  firebaseServiceAccountConfigured: boolean
+  firebaseAdminReady: boolean
+  apnsProductionKeyConfigured: boolean | null
+}
+
+export type PushTestResult = {
+  ok: boolean
+  reason?: string
+  canonicalType?: string
+  attempted?: number
+  successCount?: number
+  failureCount?: number
+  failures?: Array<{ tokenPrefix: string; code: string; message: string }>
 }
 
 export type UserPurchase = {

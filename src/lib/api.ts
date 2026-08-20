@@ -22,21 +22,39 @@ import type {
   UserProfileDetail,
   UserPurchase,
   UserReport,
+  PushDeliveryHealth,
+  PushTestResult,
   VerificationSession,
 } from "@/types"
+
+const PROD_API_BASE = "https://api.dater.social/api/v1"
+
+function isProductionSafeApiUrl(url: string): boolean {
+  if (url.startsWith("/")) {
+    return false
+  }
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === "https:" && !/^\d+\.\d+\.\d+\.\d+$/.test(parsed.hostname)
+  } catch {
+    return false
+  }
+}
 
 function resolveApiBase(): string {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim()
   if (configured) {
-    return configured.replace(/\/$/, "")
+    const normalized = configured.replace(/\/$/, "")
+    if (import.meta.env.PROD && !isProductionSafeApiUrl(normalized)) {
+      return PROD_API_BASE
+    }
+    return normalized
   }
 
-  // Production: call API directly over HTTPS (backend has CORS enabled).
   if (import.meta.env.PROD) {
-    return "https://api.dater.social/api/v1"
+    return PROD_API_BASE
   }
 
-  // Local dev: Vite proxies /api to the backend (see vite.config.ts).
   return "/api/v1"
 }
 
@@ -89,8 +107,8 @@ async function parseEnvelope<T>(response: Response): Promise<T> {
     if (response.status === 404) {
       throw new ApiError(
         API_BASE.startsWith("/")
-          ? "Admin API not found. Redeploy on Vercel after setting VITE_API_BASE_URL=/api/v1."
-          : `Admin API not found at ${API_BASE}. Check VITE_API_BASE_URL and redeploy.`,
+          ? "Admin API not found. Rebuild with VITE_API_BASE_URL=https://api.dater.social/api/v1 (see .env.production)."
+          : `Admin API not found at ${API_BASE}. Check VITE_API_BASE_URL and rebuild.`,
         404
       )
     }
@@ -491,6 +509,17 @@ export const adminApi = {
         "friends" | "pendingSent" | "pendingReceived" | "notifications" | "sessions" | "pushTokens"
       >
     >(`/admin/users/${userId}/social`)
+  },
+
+  sendUserTestPush(userId: string, eventType: string = "CHAT_DM") {
+    return adminRequest<PushTestResult>(`/admin/users/${userId}/test-push`, {
+      method: "POST",
+      body: JSON.stringify({ eventType }),
+    })
+  },
+
+  getPushHealth() {
+    return adminRequest<PushDeliveryHealth>("/admin/dashboard/push-health")
   },
 
   fileUserReport(userId: string, reason: string) {

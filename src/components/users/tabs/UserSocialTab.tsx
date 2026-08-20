@@ -1,7 +1,10 @@
+import { useState } from "react"
 import { AccountStateBadge } from "@/components/shared/AccountStateBadge"
 import { SectionCard } from "@/components/shared/FieldGrid"
 import { UserAvatar } from "@/components/users/UserAvatar"
 import { UserDetailLink } from "@/components/users/UserDetailLink"
+import { Button } from "@/components/ui/button"
+import { adminApi } from "@/lib/api"
 import type {
   Friendship,
   NotificationEvent,
@@ -12,6 +15,7 @@ import type {
 import { formatDateTime, formatIpAddress } from "@/lib/formatters"
 
 type UserSocialTabProps = {
+  userId: string
   friends: Friendship[]
   pendingSent: PendingInteraction[]
   pendingReceived: PendingInteraction[]
@@ -20,7 +24,23 @@ type UserSocialTabProps = {
   pushTokens: PushToken[]
 }
 
+function tokenKindLabel(kind: PushToken["tokenKind"]) {
+  switch (kind) {
+    case "fcm":
+      return "FCM (OK)"
+    case "apns_hex":
+      return "APNs hex (invalid)"
+    case "uuid_like":
+      return "UUID-like (invalid)"
+    case "short":
+      return "Too short"
+    default:
+      return kind
+  }
+}
+
 export function UserSocialTab({
+  userId,
   friends,
   pendingSent,
   pendingReceived,
@@ -28,6 +48,33 @@ export function UserSocialTab({
   sessions,
   pushTokens,
 }: UserSocialTabProps) {
+  const [testPushStatus, setTestPushStatus] = useState<string | null>(null)
+  const [isSendingTestPush, setIsSendingTestPush] = useState(false)
+
+  async function handleSendTestPush() {
+    setIsSendingTestPush(true)
+    setTestPushStatus(null)
+    try {
+      const result = await adminApi.sendUserTestPush(userId, "CHAT_DM")
+      if (result.ok) {
+        setTestPushStatus(
+          `Delivered (${result.successCount ?? 0}/${result.attempted ?? 0} tokens).`,
+        )
+      } else {
+        const failure = result.failures?.[0]
+        setTestPushStatus(
+          `Not delivered: ${result.reason ?? "unknown"}${
+            failure?.code ? ` — ${failure.code}` : ""
+          }`,
+        )
+      }
+    } catch (error) {
+      setTestPushStatus(error instanceof Error ? error.message : "Test push failed")
+    } finally {
+      setIsSendingTestPush(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <SectionCard title="Friends">
@@ -143,13 +190,30 @@ export function UserSocialTab({
         )}
       </SectionCard>
 
-      <SectionCard title="Push tokens">
+      <SectionCard
+        title="Push tokens"
+        description="Device is the app install id. Token prefix/length/kind show the FCM registration token used for delivery."
+      >
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isSendingTestPush || !pushTokens.some((t) => t.isActive)}
+            onClick={() => void handleSendTestPush()}
+          >
+            {isSendingTestPush ? "Sending…" : "Send test push (CHAT_DM)"}
+          </Button>
+          {testPushStatus ? (
+            <p className="text-sm text-text-secondary">{testPushStatus}</p>
+          ) : null}
+        </div>
         {pushTokens.length ? (
           <div className="admin-table-scroll">
-            <table className="min-w-[520px] w-full border-collapse">
+            <table className="min-w-[720px] w-full border-collapse">
               <thead>
                 <tr className="bg-surface-input">
-                  {["Platform", "Device", "Active", "Last Seen"].map((col) => (
+                  {["Platform", "Device", "Token", "Kind", "Active", "Last Seen"].map((col) => (
                     <th key={col} className="px-3 py-2 text-left text-xs text-text-muted">
                       {col}
                     </th>
@@ -160,7 +224,12 @@ export function UserSocialTab({
                 {pushTokens.map((token) => (
                   <tr key={token.id} className="border-t border-border-subtle">
                     <td className="px-3 py-2 text-sm">{token.platform}</td>
-                    <td className="px-3 py-2 text-sm">{token.deviceId ?? "—"}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{token.deviceId ?? "—"}</td>
+                    <td className="px-3 py-2 font-mono text-xs">
+                      {token.tokenPrefix || "—"}
+                      {token.tokenLength > 0 ? ` (${token.tokenLength})` : ""}
+                    </td>
+                    <td className="px-3 py-2 text-sm">{tokenKindLabel(token.tokenKind)}</td>
                     <td className="px-3 py-2 text-sm">{token.isActive ? "Yes" : "No"}</td>
                     <td className="px-3 py-2 text-sm">{formatDateTime(token.lastSeenAt)}</td>
                   </tr>

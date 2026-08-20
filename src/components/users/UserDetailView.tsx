@@ -214,6 +214,7 @@ export function UserDetailView({ userId, onBack }: UserDetailViewProps) {
               <TabError message="Unable to load social graph." />
             ) : (
               <UserSocialTab
+                userId={userId}
                 friends={socialQuery.data.friends}
                 pendingSent={socialQuery.data.pendingSent}
                 pendingReceived={socialQuery.data.pendingReceived}
